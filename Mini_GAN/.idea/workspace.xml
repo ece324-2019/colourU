@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0241392d-aa32-415f-b557-f65d93737cbe" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="0241392d-aa32-415f-b557-f65d93737cbe" name="Default Changelist" comment="added to cuda code which still requires testing and integration on cloud">
+      <change beforePath="$PROJECT_DIR$/../Baseline/baseline_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/baseline_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/baselinev8.pt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/discriminator_stacked.pt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/generator_stacked.pt" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,7 +29,7 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../colourU/Baseline" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -99,6 +102,14 @@
       <option name="presentableId" value="Default" />
       <updated>1573681308692</updated>
     </task>
+    <task id="LOCAL-00001" summary="added to cuda code which still requires testing and integration on cloud">
+      <created>1574053703190</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1574053703190</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -106,10 +117,16 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="added to cuda code which still requires testing and integration on cloud" />
+    <option name="LAST_COMMIT_MESSAGE" value="added to cuda code which still requires testing and integration on cloud" />
   </component>
 </project>

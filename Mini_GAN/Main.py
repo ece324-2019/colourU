@@ -7,6 +7,7 @@ from torch.autograd import Variable
 from matplotlib import pyplot as plt
 from DataProcessing import *
 from Model import *
+import argparse
 
 from time import time
 
@@ -49,18 +50,22 @@ def train(image_path, num_images, num_epochs, error_scaler=0.5, training_scaler=
         D.apply(weights_init)
         G.apply(weights_init)
     else:
+
+        '''G = Autoencoder()
+        G.load_state_dict(torch.load(g_import_name))
+        G.eval()'''
         try:
-            '''G = Autoencoder()
-            G.load_state_dict(torch.load(g_import_name))
-            G.eval()'''
             G = torch.load(g_import_name)
-            D = torch.load(d_import_name)
-            print(g_import_name, 'and', d_import_name, 'imported')
         except:
-            G = Generator()
-            D = Discriminator(input_size=d_input_size, kernelSize=d_kernel_size, kernelNum=d_kernel_number,
-                              hidden_size=d_hidden_size, output_size=d_output_size, convlayers=d_conv_layers,
-                              fclayers=d_fclayers)
+            print('ERROR: Generator Model -', g_import_name, '- not loaded')
+            return
+        try:
+            D = torch.load(d_import_name)
+        except:
+            print('ERROR: Discriminator Model -', d_import_name, '- not loaded')
+            return
+        print(g_import_name, 'and', d_import_name, 'imported')
+
     if torch.cuda.is_available():
         G.cuda()
         D.cuda()
@@ -163,18 +168,27 @@ def train(image_path, num_images, num_epochs, error_scaler=0.5, training_scaler=
     display_processed_imgs(gen_input.detach(), g_fake_data.detach(), 4)
 
 
-if torch.cuda.is_available():
-    torch.set_default_tensor_type(torch.cuda.FloatTensor)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--path', type=str, default='null')
+    parser.add_argument('--epochs', type=int, default=25)
+    parser.add_argument('--num_images', type=int, default=100)
 
-image_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/val/'
-d_import_name = 'good_d.pt'
-g_import_name = 'baseline.pt'
-d_export_name = 'good_d.pt'
-g_export_name = 'good_g.pt'
-num_images = 1000
-num_epochs = 0
-print_interval = 1
-batch_size = 64
-train(image_path, num_images, num_epochs, error_scaler=0.5, training_scaler=1, fresh_start = True,
-          d_import_name='discriminator.pt', g_import_name='generator.pt', d_export_name='discriminator.pt',
-          g_export_name='generator.pt', batch_size=64, print_interval=1, save=False)
+    args = parser.parse_args()
+    if torch.cuda.is_available():
+        torch.set_default_tensor_type(torch.cuda.FloatTensor)
+    if args.path=='null':
+        image_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/val/'
+    else:
+        image_path = args.path
+    d_import_name = 'good_d.pt'
+    g_import_name = 'baseline.pt'
+    d_export_name = 'good_d.pt'
+    g_export_name = 'good_g.pt'
+    num_images = 1000
+    num_epochs = 0
+    print_interval = 1
+    batch_size = 64
+    train(image_path, num_images, num_epochs, error_scaler=0.5, training_scaler=1, fresh_start = True,
+              d_import_name='discriminator.pt', g_import_name='generator.pt', d_export_name='discriminator.pt',
+              g_export_name='generator.pt', batch_size=64, print_interval=1, save=False)
