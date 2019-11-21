@@ -43,8 +43,8 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
             gray, real = data
             g_optimizer_pretrain.zero_grad()
             g_fake_data = G(gray)
-            g_loss = criterion2(g_fake_data, real)
-            g_loss.backward()
+            g_loss_train = criterion2(g_fake_data, real)
+            g_loss_train.backward()
             g_optimizer_pretrain.step
 
     # Pretraining Discriminator
@@ -182,7 +182,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--model', type=str, default='baseline')
     parser.add_argument('--mode', type=str, default='inference')
-    parser.add_argument('--img-path', type=str, default="/users/marka/Desktop/School/Engsci year 3/ECE324/project/tiny-imagenet-200/val/images/")
+    parser.add_argument('--img-path', type=str, default="C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/train/Fish/")
     parser.add_argument('--in-prefix', type=str, default=None)
     parser.add_argument('--out-prefix', type=str)
     parser.add_argument('--num-imgs', type=int, default=-1)
@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
     # OTHER HYPERPARAMETERS
     P = {'g_hidden_size1': 32, 'g_hidden_size2': 16, 'd_input_size':64, 'd_kernel_size':3, 'd_kernel_number':20, 'd_hidden_size':16,
-         'd_output_size':1, 'd_conv_layers':2, 'd_fclayers':1}
+         'd_output_size':1, 'd_conv_layers':1, 'd_fclayers':2}
 
     images = import_folder(args.img_path, args.num_imgs).float()
     grayimages = process(images)

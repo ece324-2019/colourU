@@ -2,19 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8c6191d6-a1cc-421b-9edd-6b0aaca9a110" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/Predict.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/Predict.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_0.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_0.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_1.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_1.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_2.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_2.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_3.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_3.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_4.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_4.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_5.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_5.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_6.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_6.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_7.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_7.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Baseline/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ColourUclean.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ColourUclean.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -61,7 +48,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Main">
+  <component name="RunManager" selected="Python.CUc">
     <configuration name="CUc" type="PythonConfigurationType" factoryName="Python">
       <module name="ColourUclean" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -75,7 +62,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
-      <option name="PARAMETERS" value="" />
+      <option name="PARAMETERS" value="--model GAN --mode train --out-prefix 'fish' --num-imgs 100 --epochs 40" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
