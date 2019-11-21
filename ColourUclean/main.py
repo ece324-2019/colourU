@@ -7,12 +7,12 @@ from model import *
 from time import time
 
 
-def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=1e-4, g_learning_rate=1e-2):
+def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=None, d_learning_rate=1e-4, g_learning_rate=1e-2):
     # Settings and Hyperparameters
     g_error_scaler = 2
     g_train_scaler = 50
-    g_pretrain_epoch = 20
-    d_pretrain_epoch = 20
+    g_pretrain_epoch = 40
+    d_pretrain_epoch = 40
     print_interval = 1
 
 
@@ -37,40 +37,44 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
     t_init = time()
 
     # Pretraining Generator
-    print("Pretrain Generator")
-    for epoch in range(g_pretrain_epoch):
-        print('Epoch:', epoch)
-        G.train()
-        for data in train_loader:
-            gray, real = data
-            g_optimizer_pretrain.zero_grad()
-            g_fake_data = G(gray)
-            g_loss_train = criterion2(g_fake_data, real)
-            g_loss_train.backward()
-            g_optimizer_pretrain.step()
+    if pretraining:
+        print("Pretrain Generator")
+        for epoch in range(g_pretrain_epoch):
+            print('Epoch:', epoch)
+            G.train()
+            for data in train_loader:
+                gray, real = data
+                g_optimizer_pretrain.zero_grad()
+                g_fake_data = G(gray)
+                g_loss_train = criterion2(g_fake_data, real)
+                g_loss_train.backward()
+                g_optimizer_pretrain.step()
 
-    # Pretraining Discriminator
-    print("Pretrain Discriminator")
-    for epoch in range(d_pretrain_epoch):
-        print('Epoch:', epoch)
-        G.eval()
-        D.train()
-        for data in train_loader:
-            gray, real = data
-            d_optimizer_pretrain.zero_grad()
+        # Pretraining Discriminator
+        print("Pretrain Discriminator")
+        for epoch in range(d_pretrain_epoch):
+            print('Epoch:', epoch)
+            G.eval()
+            D.train()
+            for data in train_loader:
+                gray, real = data
+                d_optimizer_pretrain.zero_grad()
 
-            # Train discriminator on real
-            d_real_decision = D(real)
-            d_real_error = criterion(d_real_decision.squeeze(), torch.ones([d_real_decision.shape[0]]))
-            d_real_error.backward()
+                # Train discriminator on real
+                d_real_decision = D(real)
+                d_real_error = criterion(d_real_decision.squeeze(), torch.ones([d_real_decision.shape[0]]))
+                d_real_error.backward()
 
-            # Train on the fake
-            d_fake_data = G(gray).detach()
-            d_fake_decision = D(d_fake_data)
-            d_fake_error = criterion(d_fake_decision.squeeze(), torch.zeros([d_fake_decision.shape[0]]))
-            d_fake_error.backward()
+                # Train on the fake
+                d_fake_data = G(gray).detach()
+                d_fake_decision = D(d_fake_data)
+                d_fake_error = criterion(d_fake_decision.squeeze(), torch.zeros([d_fake_decision.shape[0]]))
+                d_fake_error.backward()
 
-            d_optimizer_pretrain.step()
+                d_optimizer_pretrain.step()
+
+    g_fake_data = G(train_loader.dataset.tensors[0][:4, :, :, :]).detach()
+    display_imgs((train_loader.dataset.tensors[1][:4, :, :, :], g_fake_data), ("real", "fake"))
 
     # Train GAN
     print('Train GAN')
@@ -175,6 +179,16 @@ def run():
     pass
 
 
+
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
     # PARSER
     parser = argparse.ArgumentParser()
@@ -196,7 +210,7 @@ if __name__ == '__main__':
          'd_output_size':1, 'd_conv_layers':1, 'd_fclayers':2}
 
     if args.user=='mark':
-        img_path = ''
+        img_path = '/users/marka/Desktop/School/Engsci year 3/ECE324/project/tiny-imagenet-200/train/n01443537/images/'
     elif args.user=='alice':
         img_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/train/Fish/'
     else:
@@ -215,6 +229,7 @@ if __name__ == '__main__':
         if args.model == "GAN":
             G = None
             D = None
+            PT = True if args.in_prefix==None else False
 
             if args.in_prefix == None:
                 G = Generator(hidden_size1=P['g_hidden_size1'], hidden_size2=P['g_hidden_size2'])
@@ -229,7 +244,7 @@ if __name__ == '__main__':
                     print("MODELS NOT FOUND")
                     exit()
 
-            train_GAN(G, D, train_loader, out_file=args.out_prefix, num_epochs=args.epochs)
+            train_GAN(G, D, train_loader, pretraining=PT, out_file=args.out_prefix, num_epochs=args.epochs)
         else:
             M = None
 
