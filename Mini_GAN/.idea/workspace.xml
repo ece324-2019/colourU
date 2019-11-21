@@ -3,11 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="0241392d-aa32-415f-b557-f65d93737cbe" name="Default Changelist" comment="added to cuda code which still requires testing and integration on cloud">
       <change beforePath="$PROJECT_DIR$/../Baseline/baseline_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/baseline_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/baselinev8.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/discriminator_stacked.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/generator_stacked.pt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataProcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataProcessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

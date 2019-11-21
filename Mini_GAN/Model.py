@@ -41,7 +41,7 @@ class Generator(nn.Module):
 
     def forward(self, x):
         u = self.gen(x)
-        u = torch.cat((x[:,0:1,:,:], u), dim=1)
+        u = torch.cat((x[:, 0:1, :, :], u), dim=1)
         return u
 
 
@@ -123,6 +123,6 @@ class Autoencoder(nn.Module):
         u = self.encoder(x)
         u = self.decoder(u)
 
-        u = torch.stack((x[:,0,:,:], u[:,0,:,:], u[:,1,:,:]), dim=1)
+        u = torch.stack((x[:, 0, :, :], u[:, 0, :, :], u[:, 1, :, :]), dim=1)
 
         return u

@@ -80,7 +80,7 @@ def display_imgs(img_tensor_list, labels):
 
     for set in range(num_sets):
         for img in range(num_imgs):
-            image = img_tensor_list[set][img, :, :, :].permute(1,2,0)
+            image = img_tensor_list[set][img, :, :, :].permute(1, 2, 0)
             figure = fig.add_subplot(num_sets, num_imgs, num_imgs*set + img + 1)
 
             if img == 0:
