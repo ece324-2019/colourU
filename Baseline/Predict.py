@@ -6,10 +6,10 @@ from model import *
 
 
 def run():
-    image_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/train/Fish/'
+    image_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/val/'
     # Settings and Hyperparameters
     fresh_start = False  # True to start new model False to continue training saved model
-    import_name = 'baseline_fish.pt'
+    import_name = 'bestKernel_Num_Set_2.pt'
     num_images = 30
 
 
