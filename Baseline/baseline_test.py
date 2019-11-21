@@ -59,9 +59,11 @@ def hyperparameter_search(num_images, val_num_images):
 
     for i in range(len(kernel_nums)):
         model = Autoencoder(kernel_nums[i], kernel_sizes[0])
-        model, loss = train(model, train_data, val_data, num_epochs=15, batch_size=64, name=('Kernel_Num_Set_'+str(i)))
+        model, loss = train(model, train_data, val_data, num_images, val_num_images, num_epochs=15,
+                            batch_size=64, name=('Kernel_Num_Set_'+str(i)))
         kernel_num_losses[i] = loss
-    plt.plot(np.arange(0,len(kernel_nums)), kernel_num_losses)
+    print(kernel_num_losses)
+    plt.plot(np.arange(len(kernel_nums)), kernel_num_losses)
     plt.title('Hyperparameter Search: Number of Kernels')
     plt.xlabel('Kernel Numbers')
     plt.ylabel('Loss')
@@ -69,10 +71,10 @@ def hyperparameter_search(num_images, val_num_images):
 
     for i in range(len(kernel_sizes)):
         model = Autoencoder(kernel_nums[0], kernel_sizes[i])
-        model, loss = train(model, train_data, val_data, num_epochs=15, batch_size=64, name=('Kernel_Size_Set_'+str(i)))
+        model, loss = train(model, train_data, val_data, num_images, val_num_images, num_epochs=15, batch_size=64, name=('Kernel_Size_Set_'+str(i)))
         kernel_num_losses[i] = loss
 
-    plt.plot(np.arange(0,len(kernel_sizes)), kernel_size_losses)
+    plt.plot(np.arange(len(kernel_sizes)), kernel_size_losses)
     plt.title('Hyperparameter Search: Kernel Sizes')
     plt.xlabel('Kernel Size')
     plt.ylabel('Loss')

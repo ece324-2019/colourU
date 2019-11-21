@@ -31,10 +31,8 @@ class Autoencoder(nn.Module):
         return u
 
 
-def train(model, data, val_data, num_epochs=5,  batch_size=64, learning_rate=1e-3, name='null'):
+def train(model, data, val_data, num_imgs, num_val_imgs, num_epochs=5,  batch_size=64, learning_rate=1e-3, name='null'):
     torch.manual_seed(42)
-    train_data_size = len(data)
-    val_data_size = len(val_data)
     criterion = nn.MSELoss()  # mean square error loss
     optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-5) # <--
     train_loader = DataLoader(data, batch_size=batch_size, shuffle=True)
@@ -52,17 +50,18 @@ def train(model, data, val_data, num_epochs=5,  batch_size=64, learning_rate=1e-
             optimizer.step()
             optimizer.zero_grad()
             loss_array[epoch] += loss
-        loss_array[epoch] = loss_array[epoch]/train_data_size
+        loss_array[epoch] = loss_array[epoch]/num_imgs
         model.eval()
         for data in val_loader:
             img_in, img_out = data
             recon = model(img_in)
             loss = criterion(recon, img_out)
-            val_loss_array[epoch] += loss
-        val_loss_array[epoch] = val_loss_array[epoch] / val_data_size
+            val_loss_array[epoch] += loss  #acummulate
+        val_loss_array[epoch] = val_loss_array[epoch] / num_val_imgs  # normalize
         if val_loss_array[epoch] < min_val_loss:
             torch.save(model, 'best'+name+'.pt')
-        print('Epoch:{}, Loss:{:.4f}'.format(epoch+1, float(loss)))
+        print('Epoch:{}, Train Loss:{:.4f}, Val Loss:{:.4f}'.format(epoch+1, float(loss_array[epoch]),
+                                                                    float(val_loss_array[epoch])))
 
     plt.plot(np.arange(0, num_epochs), loss_array, label='training')
     plt.plot(np.arange(0, num_epochs), val_loss_array, label='validation')
