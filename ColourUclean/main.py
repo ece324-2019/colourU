@@ -5,7 +5,7 @@ from DataProcessing import *
 from model import *
 
 from time import time
-
+import numpy as np
 
 def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=None, d_learning_rate=1e-4, g_learning_rate=1e-2):
     # Settings and Hyperparameters
@@ -33,8 +33,6 @@ def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=No
 
     d_loss_index = 0
     g_loss_index = 0
-
-    t_init = time()
 
     # Pretraining Generator
     if pretraining:
@@ -73,11 +71,9 @@ def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=No
 
                 d_optimizer_pretrain.step()
 
-    g_fake_data = G(train_loader.dataset.tensors[0][:4, :, :, :]).detach()
-    display_imgs((train_loader.dataset.tensors[1][:4, :, :, :], g_fake_data), ("real", "fake"))
-
     # Train GAN
     print('Train GAN')
+    t_init = time()
     for epoch in range(num_epochs):
         D.train()
         G.eval()
@@ -204,6 +200,8 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=5)
 
     args = parser.parse_args()
+    np.random.seed(42)
+    torch.manual_seed(42)
 
     # OTHER HYPERPARAMETERS
     P = {'g_hidden_size1': 32, 'g_hidden_size2': 16, 'd_input_size':64, 'd_kernel_size':3, 'd_kernel_number':20, 'd_hidden_size':16,
@@ -238,8 +236,8 @@ if __name__ == '__main__':
                                   fclayers=P['d_fclayers'])
             else:
                 try:
-                    G = torch.load(args.in_prefix + '_D.pt')
-                    D = torch.load(args.in_prefix + '_G.pt')
+                    G = torch.load(args.in_prefix + '_G.pt')
+                    D = torch.load(args.in_prefix + '_D.pt')
                 except:
                     print("MODELS NOT FOUND")
                     exit()

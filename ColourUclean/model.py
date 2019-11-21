@@ -11,9 +11,9 @@ class Autoencoder(nn.Module):
         self.encoder = nn.Sequential(  # like the Composition layer you built
             nn.Conv2d(3, 16, 3, stride=2, padding=1),
             nn.ReLU(),nn.Conv2d(16, 32, 3, stride=2, padding=1),
-            nn.ReLU(),nn.Conv2d(32, 64, 7))
+            nn.ReLU(),nn.Conv2d(32, 64, 3))
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(64, 32, 7),
+            nn.ConvTranspose2d(64, 32, 3),
             nn.ReLU(),
             nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),
             nn.ReLU(),nn.ConvTranspose2d(16, 2, 3, stride=2, padding=1, output_padding=1)
@@ -33,11 +33,11 @@ class Generator(nn.Module):
         self.gen = nn.Sequential(  # like the Composition layer you built
             nn.Conv2d(3, hidden_size1, 3, stride=2, padding=1),
             nn.ReLU(), nn.Conv2d(hidden_size1, hidden_size2, 3, stride=2, padding=1),
-            nn.ReLU(), nn.Conv2d(hidden_size2, 64, 7),
-            nn.ConvTranspose2d(64, hidden_size2, 7),
+            nn.ReLU(), nn.Conv2d(hidden_size2, 64, 3),
+            nn.ConvTranspose2d(64, hidden_size2, 3),
             nn.ReLU(),
             nn.ConvTranspose2d(hidden_size2, hidden_size1, 3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(), nn.ConvTranspose2d(hidden_size1, 3, 3, stride=2, padding=1, output_padding=1))
+            nn.ReLU(), nn.ConvTranspose2d(hidden_size1, 2, 3, stride=2, padding=1, output_padding=1))
 
     def forward(self, x):
         u = self.gen(x)
