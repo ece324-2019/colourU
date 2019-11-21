@@ -37,7 +37,9 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
     t_init = time()
 
     # Pretraining Generator
+    print("Pretrain Generator")
     for epoch in range(g_pretrain_epoch):
+        print('Epoch:', epoch)
         G.train()
         for data in train_loader:
             gray, real = data
@@ -48,7 +50,9 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
             g_optimizer_pretrain.step
 
     # Pretraining Discriminator
+    print("Pretrain Discriminator")
     for epoch in range(d_pretrain_epoch):
+        print('Epoch:', epoch)
         G.eval()
         D.train()
         for data in train_loader:
@@ -69,6 +73,7 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
             d_optimizer_pretrain.step()
 
     # Train GAN
+    print('Train GAN')
     for epoch in range(num_epochs):
         D.train()
         G.eval()
@@ -165,15 +170,9 @@ def train_baseline (model, train_loader, num_epochs=5, learning_rate=1e-3):
 
     return (loss_whole)
 
-def run ():
+
+def run():
     pass
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
@@ -182,6 +181,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--model', type=str, default='baseline')
     parser.add_argument('--mode', type=str, default='inference')
+    parser.add_argument('--user', type=str, default='none')
     parser.add_argument('--img-path', type=str, default="C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/train/Fish/")
     parser.add_argument('--in-prefix', type=str, default=None)
     parser.add_argument('--out-prefix', type=str)
@@ -195,7 +195,13 @@ if __name__ == '__main__':
     P = {'g_hidden_size1': 32, 'g_hidden_size2': 16, 'd_input_size':64, 'd_kernel_size':3, 'd_kernel_number':20, 'd_hidden_size':16,
          'd_output_size':1, 'd_conv_layers':1, 'd_fclayers':2}
 
-    images = import_folder(args.img_path, args.num_imgs).float()
+    if args.user=='mark':
+        img_path = ''
+    elif args.user=='alice':
+        img_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/train/Fish/'
+    else:
+        img_path = args.img_path
+    images = import_folder(img_path, args.num_imgs).float()
     grayimages = process(images)
     DT = TensorDataset(grayimages, images)
     train_loader = DataLoader(DT, batch_size=args.batch_size, shuffle=True)
