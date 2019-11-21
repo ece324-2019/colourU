@@ -11,7 +11,10 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
     # Settings and Hyperparameters
     g_error_scaler = 2
     g_train_scaler = 50
+    g_pretrain_epoch = 20
+    d_pretrain_epoch = 20
     print_interval = 1
+
 
     # Model Parameters
     d_steps = 1
@@ -20,6 +23,8 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
     # load images
     criterion = nn.BCELoss()
     criterion2 = nn.MSELoss()
+    d_optimizer_pretrain = optim.Adam(D.parameters(), lr=d_learning_rate)  # , momentum=sgd_momentum)
+    g_optimizer_pretrain = optim.Adam(G.parameters(), lr=g_learning_rate)  # , momentum=sgd_momentum)
     d_optimizer = optim.Adam(D.parameters(), lr=d_learning_rate)  # , momentum=sgd_momentum)
     g_optimizer = optim.Adam(G.parameters(), lr=g_learning_rate)  # , momentum=sgd_momentum)
 
@@ -30,14 +35,25 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
     g_loss_index = 0
 
     t_init = time()
-    for epoch in range(num_epochs):
-        D.train()
-        G.eval()
 
-        d_loss_batch = []
+    # Pretraining Generator
+    for epoch in range(g_pretrain_epoch):
+        G.train()
         for data in train_loader:
             gray, real = data
-            D.zero_grad()
+            g_optimizer_pretrain.zero_grad()
+            g_fake_data = G(gray)
+            g_loss = criterion2(g_fake_data, real)
+            g_loss.backward()
+            g_optimizer_pretrain.step
+
+    # Pretraining Discriminator
+    for epoch in range(d_pretrain_epoch):
+        G.eval()
+        D.train()
+        for data in train_loader:
+            gray, real = data
+            d_optimizer_pretrain.zero_grad()
 
             # Train discriminator on real
             d_real_decision = D(real)
@@ -45,6 +61,29 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
             d_real_error.backward()
 
             # Train on the fake
+            d_fake_data = G(gray).detach()
+            d_fake_decision = D(d_fake_data)
+            d_fake_error = criterion(d_fake_decision.squeeze(), torch.zeros([d_fake_decision.shape[0]]))
+            d_fake_error.backward()
+
+            d_optimizer_pretrain.step()
+
+    # Train GAN
+    for epoch in range(num_epochs):
+        D.train()
+        G.eval()
+
+        d_loss_batch = []
+        for data in train_loader:
+            gray, real = data
+            d_optimizer.zero_grad()
+
+            # Train discriminator on real images
+            d_real_decision = D(real)
+            d_real_error = criterion(d_real_decision.squeeze(), torch.ones([d_real_decision.shape[0]]))
+            d_real_error.backward()
+
+            # Train on the fake images
             d_fake_data = G(gray).detach()
             d_fake_decision = D(d_fake_data)
             d_fake_error = criterion(d_fake_decision.squeeze(), torch.zeros([d_fake_decision.shape[0]]))
@@ -65,7 +104,7 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
             for data in train_loader:
                 gray, real = data
 
-                G.zero_grad()
+                g_optimizer.zero_grad()
 
                 g_fake_data = G(gray)
                 dg_fake_decision = D(g_fake_data)

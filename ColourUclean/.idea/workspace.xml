@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c6191d6-a1cc-421b-9edd-6b0aaca9a110" name="Default Changelist" comment="" />
+    <list default="true" id="8c6191d6-a1cc-421b-9edd-6b0aaca9a110" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/Predict.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/Predict.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_0.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_0.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_1.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_1.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_2.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_2.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_3.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_3.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_4.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_4.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_5.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_5.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_6.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_6.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_7.pt" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/bestKernel_Num_Set_7.pt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Baseline/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Baseline/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/ColourUclean.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ColourUclean.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,9 +31,14 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
   <component name="ProjectId" id="1Tlphjw0ZqH11heCaIBW6SO8CfL" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../ColourUtesting" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="PyConsoleOptionsProvider">
@@ -40,7 +61,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.CUc">
+  <component name="RunManager" selected="Python.Main">
     <configuration name="CUc" type="PythonConfigurationType" factoryName="Python">
       <module name="ColourUclean" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -48,7 +69,7 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Users\marka\PycharmProjects\ColourU\venv\Scripts\python.exe" />
+      <option name="SDK_HOME" value="C:\Users\Alice\Anaconda3\envs\ece324\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -69,7 +90,7 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Users\marka\PycharmProjects\ColourU\venv\Scripts\python.exe" />
+      <option name="SDK_HOME" value="C:\Users\Alice\Anaconda3\envs\ece324\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -100,5 +121,16 @@
       <updated>1574044657961</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

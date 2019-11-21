@@ -60,6 +60,7 @@ def train(model, data, val_data, num_imgs, num_val_imgs, num_epochs=5,  batch_si
         val_loss_array[epoch] = val_loss_array[epoch] / num_val_imgs  # normalize
         if val_loss_array[epoch] < min_val_loss:
             torch.save(model, 'best'+name+'.pt')
+            min_val_loss = val_loss_array[epoch]
         print('Epoch:{}, Train Loss:{:.4f}, Val Loss:{:.4f}'.format(epoch+1, float(loss_array[epoch]),
                                                                     float(val_loss_array[epoch])))
 
@@ -70,6 +71,5 @@ def train(model, data, val_data, num_imgs, num_val_imgs, num_epochs=5,  batch_si
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.show()
-
 
     return model, min_val_loss

@@ -9,7 +9,7 @@ def run():
     image_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/train/Fish/'
     # Settings and Hyperparameters
     fresh_start = False  # True to start new model False to continue training saved model
-    import_name = 'baseline.pt'
+    import_name = 'baseline_fish.pt'
     num_images = 30
 
 
