@@ -47,7 +47,7 @@ def train_GAN (G, D, train_loader, num_epochs=5, out_file=None, d_learning_rate=
             g_fake_data = G(gray)
             g_loss_train = criterion2(g_fake_data, real)
             g_loss_train.backward()
-            g_optimizer_pretrain.step
+            g_optimizer_pretrain.step()
 
     # Pretraining Discriminator
     print("Pretrain Discriminator")
