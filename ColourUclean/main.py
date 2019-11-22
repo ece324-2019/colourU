@@ -7,13 +7,16 @@ from model import *
 from time import time
 import numpy as np
 
-def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=None, d_learning_rate=1e-4, g_learning_rate=1e-2):
+
+def train_GAN (G, D, train_loader, val_loader, train_num, val_num, pretraining = True, num_epochs=5, out_file=None, d_learning_rate=1e-4, g_learning_rate=1e-2):
+
     # Settings and Hyperparameters
     g_error_scaler = 2
     g_train_scaler = 50
     g_pretrain_epoch = 40
     d_pretrain_epoch = 40
     print_interval = 1
+    val_interval = 5
 
 
     # Model Parameters
@@ -23,6 +26,7 @@ def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=No
     # load images
     criterion = nn.BCELoss()
     criterion2 = nn.MSELoss()
+    loss_normalizer = nn.MSELoss()
     d_optimizer_pretrain = optim.Adam(D.parameters(), lr=d_learning_rate)  # , momentum=sgd_momentum)
     g_optimizer_pretrain = optim.Adam(G.parameters(), lr=g_learning_rate)  # , momentum=sgd_momentum)
     d_optimizer = optim.Adam(D.parameters(), lr=d_learning_rate)  # , momentum=sgd_momentum)
@@ -30,10 +34,13 @@ def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=No
 
     d_loss = np.zeros(num_epochs * d_steps)
     g_loss = np.zeros(num_epochs * g_steps)
+    g_val_loss = np.zeros((-(-num_epochs // val_interval)))
 
     d_loss_index = 0
     g_loss_index = 0
+    g_val_loss_index = 0
 
+    min_val_loss = 10000
     # Pretraining Generator
     if pretraining:
         print("Pretrain Generator")
@@ -48,8 +55,8 @@ def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=No
                 g_loss_train.backward()
                 g_optimizer_pretrain.step()
 
-        # Pretraining Discriminator
-        print("Pretrain Discriminator")
+        # Pre-training Discriminator
+        print("Pre-train Discriminator")
         for epoch in range(d_pretrain_epoch):
             print('Epoch:', epoch)
             G.eval()
@@ -74,11 +81,11 @@ def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=No
     # Train GAN
     print('Train GAN')
     t_init = time()
+    val_x_axis = []
     for epoch in range(num_epochs):
         D.train()
         G.eval()
 
-        d_loss_batch = []
         for data in train_loader:
             gray, real = data
             d_optimizer.zero_grad()
@@ -94,21 +101,19 @@ def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=No
             d_fake_error = criterion(d_fake_decision.squeeze(), torch.zeros([d_fake_decision.shape[0]]))
             d_fake_error.backward()
 
-            d_loss_batch += [(d_real_error + d_fake_error) / (d_real_decision.shape[0] + d_fake_decision.shape[0])]
+            d_loss[d_loss_index] +=d_real_error + d_fake_error
 
             d_optimizer.step()
 
-        d_loss[d_loss_index] = sum(d_loss_batch)/len(d_loss_batch)
+        d_loss[d_loss_index] = d_loss[d_loss_index]/(2*train_num)
         d_loss_index += 1
 
         D.eval()
         G.train()
 
         for i in range(g_steps):
-            g_loss_batch = []
             for data in train_loader:
                 gray, real = data
-
                 g_optimizer.zero_grad()
 
                 g_fake_data = G(gray)
@@ -119,16 +124,37 @@ def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=No
                 g_error.backward()
                 g_optimizer.step()  # Only optimizes G's parameters
 
-                g_loss_batch += [g_error / dg_fake_decision.shape[0]]
+                g_loss[g_loss_index] +=g_error
 
-            g_loss[g_loss_index] = sum(g_loss_batch)/len(g_loss_batch)
+            g_loss[g_loss_index] = g_loss[g_loss_index]/train_num
             g_loss_index += 1
+        if epoch % val_interval == 0:
+            for data in val_loader:
+                gray, real = data
+                g_fake_data = G(gray)
+                g_error = criterion2(g_fake_data, real)
+                normalization = loss_normalizer(gray, real)
+                g_val_loss[g_val_loss_index] += g_error/normalization
+            g_val_loss[g_val_loss_index] = g_val_loss[g_val_loss_index]/val_num
+            val_x_axis.append(epoch)
+            if g_val_loss[g_val_loss_index] < min_val_loss:
+                torch.save(D, out_file + "_D.pt")
+                torch.save(G, out_file + "_G.pt")
+                min_val_loss = g_val_loss[g_val_loss_index]
+                g_val_loss_index += 1
 
         if epoch % print_interval == 0:
             print("(", time() - t_init, ") Epoch", epoch, ": D (error:", d_loss[d_loss_index - 1], ") G (error:", g_loss[g_loss_index - 1], "); ")
 
     torch.save(D, out_file + "_D.pt")
     torch.save(G, out_file + "_G.pt")
+
+    plt.plot(np.arange(0, g_loss_index), g_loss, label='Generator')
+    plt.legend()
+    plt.title('Normalized GAN Losses')
+    plt.xlabel('Epochs')
+    plt.ylabel('Normalized Loss')
+    plt.show()
 
     plt.plot(np.arange(0, d_loss_index), d_loss, label='Discriminator')
     plt.legend()
@@ -145,6 +171,7 @@ def train_GAN (G, D, train_loader, pretraining = True, num_epochs=5, out_file=No
 
     g_fake_data = G(train_loader.dataset.tensors[0][:4, :,:,:]).detach()
     display_imgs((train_loader.dataset.tensors[1][:4, :,:,:], g_fake_data), ("real", "fake"))
+
 
 def train_baseline (model, train_loader, num_epochs=5, learning_rate=1e-3):
     criterion = nn.MSELoss()  # mean square error loss
@@ -196,6 +223,7 @@ if __name__ == '__main__':
     parser.add_argument('--in-prefix', type=str, default=None)
     parser.add_argument('--out-prefix', type=str)
     parser.add_argument('--num-imgs', type=int, default=-1)
+    parser.add_argument('--val-num-imgs', type=int, default=-1)
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--epochs', type=int, default=5)
 
@@ -209,14 +237,23 @@ if __name__ == '__main__':
 
     if args.user=='mark':
         img_path = '/users/marka/Desktop/School/Engsci year 3/ECE324/project/tiny-imagenet-200/train/n01443537/images/'
+        val_path = '/users/marka/Desktop/School/Engsci year 3/ECE324/project/tiny-imagenet-200/train/n01443537/images/'
     elif args.user=='alice':
         img_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/train/Fish/'
+        val_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/train/Fish/'
     else:
         img_path = args.img_path
     images = import_folder(img_path, args.num_imgs).float()
     grayimages = process(images)
     DT = TensorDataset(grayimages, images)
     train_loader = DataLoader(DT, batch_size=args.batch_size, shuffle=True)
+    train_size = len(images)
+    if args.mode != 'inference':
+        images = import_folder(val_path, args.val_num_imgs).float()
+        grayimages = process(images)
+        DT = TensorDataset(grayimages, images)
+        val_size = len(images)
+        val_loader = DataLoader(DT, batch_size=args.batch_size, shuffle=True)
 
     # CALL RUN IF INFERENCE MODE
     if args.mode == 'inference':
@@ -242,7 +279,7 @@ if __name__ == '__main__':
                     print("MODELS NOT FOUND")
                     exit()
 
-            train_GAN(G, D, train_loader, pretraining=PT, out_file=args.out_prefix, num_epochs=args.epochs)
+            train_GAN(G, D, train_loader, val_loader, train_size, val_size, pretraining=PT, out_file=args.out_prefix, num_epochs=args.epochs)
         else:
             M = None
 
@@ -256,4 +293,4 @@ if __name__ == '__main__':
                     print("MODEL NOT FOUND")
                     exit()
 
-            train_baseline(M, train_loader, num_epochs=args.epochs)
+            train_baseline(M, train_loader, val_loader, train_size, val_size, num_epochs=args.epochs)
