@@ -126,6 +126,7 @@ def train_GAN (G, D, train_loader, val_loader, train_num, val_num, pretraining =
 
             g_loss[g_loss_index] = g_loss[g_loss_index]/train_num
             g_loss_index += 1
+
         if epoch % val_interval == 0:
             for data in val_loader:
                 gray, real = data
