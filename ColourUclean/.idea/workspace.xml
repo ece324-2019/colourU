@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8c6191d6-a1cc-421b-9edd-6b0aaca9a110" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/ColourUclean.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ColourUclean.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -66,7 +64,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
-      <option name="PARAMETERS" value="--model GAN --user alice --mode train --out-prefix fish2 --num-imgs 500 --epochs 10" />
+      <option name="PARAMETERS" value="--model GAN --user alice --mode train --out-prefix fish_val --num-imgs 100 --val-num-imgs 20 --epochs 5" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
