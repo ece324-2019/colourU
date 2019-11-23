@@ -137,8 +137,8 @@ def train_GAN (G, D, train_loader, val_loader, train_num, val_num, pretraining =
             g_val_loss[g_val_loss_index] = g_val_loss[g_val_loss_index]/val_num
             val_x_axis.append(epoch)
             if g_val_loss[g_val_loss_index] < min_val_loss:
-                torch.save(D, out_file + "_D.pt")
-                torch.save(G, out_file + "_G.pt")
+                torch.save(D, out_file + "_min_val_loss_D.pt")
+                torch.save(G, out_file + "_min_val_loss_G.pt")
                 min_val_loss = g_val_loss[g_val_loss_index]
                 g_val_loss_index += 1
 
@@ -194,7 +194,7 @@ def train_baseline (model, train_loader, num_epochs=5, learning_rate=1e-3):
 
         print('({:.1f}) Epoch:{}, Loss:{:.4f}'.format(time() - t_init, epoch + 1, float(loss)))
 
-    return (loss_whole)
+    return loss_whole
 
 
 def run():
@@ -227,6 +227,8 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=5)
 
     args = parser.parse_args()
+    if torch.cuda.is_available():
+        torch.set_default_tensor_type(torch.cuda.FloatTensor)
     np.random.seed(42)
     torch.manual_seed(42)
 
@@ -278,6 +280,10 @@ if __name__ == '__main__':
                     print("MODELS NOT FOUND")
                     exit()
 
+            if torch.cuda.is_available():
+                G.cuda()
+                D.cuda()
+
             train_GAN(G, D, train_loader, val_loader, train_size, val_size, pretraining=PT, out_file=args.out_prefix, num_epochs=args.epochs)
         else:
             M = None
@@ -291,5 +297,8 @@ if __name__ == '__main__':
                 except:
                     print("MODEL NOT FOUND")
                     exit()
+
+            if torch.cuda.is_available():
+                M.cuda()
 
             train_baseline(M, train_loader, val_loader, train_size, val_size, num_epochs=args.epochs)
