@@ -8,15 +8,15 @@ from time import time
 import numpy as np
 
 
-def train_GAN (G, D, train_loader, val_loader, train_num, val_num, pretraining = True, num_epochs=5, out_file=None, d_learning_rate=1e-4, g_learning_rate=1e-2):
+def train_GAN (G, D, train_loader, val_loader, test_loader, train_num, val_num, test_num, source_path, pretraining = True, num_epochs=5, out_file=None, d_learning_rate=1e-4, g_learning_rate=1e-2):
 
     # Settings and Hyperparameters
-    g_error_scaler = 2
+    g_error_scaler = 0.05
     g_train_scaler = 50
-    g_pretrain_epoch = 40
-    d_pretrain_epoch = 40
+    g_pretrain_epoch = 20
+    d_pretrain_epoch = 20
     print_interval = 1
-    val_interval = 5
+    val_interval = 2
 
 
     # Model Parameters
@@ -32,9 +32,10 @@ def train_GAN (G, D, train_loader, val_loader, train_num, val_num, pretraining =
     d_optimizer = optim.Adam(D.parameters(), lr=d_learning_rate)  # , momentum=sgd_momentum)
     g_optimizer = optim.Adam(G.parameters(), lr=g_learning_rate)  # , momentum=sgd_momentum)
 
-    d_loss = np.zeros(num_epochs * d_steps)
-    g_loss = np.zeros(num_epochs * g_steps)
-    g_val_loss = np.zeros((-(-num_epochs // val_interval)))
+    d_loss = np.zeros(num_epochs)
+    g_loss = np.zeros(num_epochs)
+    g_val_loss = np.zeros((-(-num_epochs // val_interval))-1)
+    d_val_accuracy = np.zeros((-(-num_epochs // val_interval))-1)
 
     d_loss_index = 0
     g_loss_index = 0
@@ -67,13 +68,13 @@ def train_GAN (G, D, train_loader, val_loader, train_num, val_num, pretraining =
 
                 # Train discriminator on real
                 d_real_decision = D(real)
-                d_real_error = criterion(d_real_decision.squeeze(), torch.ones([d_real_decision.shape[0]]))
+                d_real_error = criterion(d_real_decision.squeeze(), torch.zeros([d_real_decision.shape[0]]))
                 d_real_error.backward()
 
                 # Train on the fake
                 d_fake_data = G(gray).detach()
                 d_fake_decision = D(d_fake_data)
-                d_fake_error = criterion(d_fake_decision.squeeze(), torch.zeros([d_fake_decision.shape[0]]))
+                d_fake_error = criterion(d_fake_decision.squeeze(), torch.ones([d_fake_decision.shape[0]]))
                 d_fake_error.backward()
 
                 d_optimizer_pretrain.step()
@@ -92,13 +93,13 @@ def train_GAN (G, D, train_loader, val_loader, train_num, val_num, pretraining =
 
             # Train discriminator on real images
             d_real_decision = D(real)
-            d_real_error = criterion(d_real_decision.squeeze(), torch.ones([d_real_decision.shape[0]]))
+            d_real_error = criterion(d_real_decision.squeeze(), torch.zeros([d_real_decision.shape[0]]))
             d_real_error.backward()
 
             # Train on the fake images
             d_fake_data = G(gray).detach()
             d_fake_decision = D(d_fake_data)
-            d_fake_error = criterion(d_fake_decision.squeeze(), torch.zeros([d_fake_decision.shape[0]]))
+            d_fake_error = criterion(d_fake_decision.squeeze(), torch.ones([d_fake_decision.shape[0]]))
             d_fake_error.backward()
 
             d_loss[d_loss_index] +=d_real_error + d_fake_error
@@ -118,7 +119,7 @@ def train_GAN (G, D, train_loader, val_loader, train_num, val_num, pretraining =
 
                 g_fake_data = G(gray)
                 dg_fake_decision = D(g_fake_data)
-                g_error_1 = criterion(dg_fake_decision.squeeze(), torch.ones([dg_fake_decision.shape[0]]))  # Train G to pretend it's genuine
+                g_error_1 = criterion(dg_fake_decision.squeeze(), torch.zeros([dg_fake_decision.shape[0]]))  # Train G to pretend it's genuine
                 g_error_2 = criterion2(g_fake_data, real)
                 g_error = g_error_1 + g_error_scaler * g_error_2
                 g_error.backward()
@@ -126,51 +127,106 @@ def train_GAN (G, D, train_loader, val_loader, train_num, val_num, pretraining =
 
                 g_loss[g_loss_index] +=g_error
 
-            g_loss[g_loss_index] = g_loss[g_loss_index]/train_num
-            g_loss_index += 1
-        if epoch % val_interval == 0:
+        g_loss[g_loss_index] = g_loss[g_loss_index]/(g_steps*train_num)
+        g_loss_index += 1
+
+        if epoch % val_interval == 0 and epoch != 0:
+            G.eval()
+            D.eval()
             for data in val_loader:
                 gray, real = data
                 g_fake_data = G(gray)
                 g_error = criterion2(g_fake_data, real)
                 normalization = loss_normalizer(gray, real)
                 g_val_loss[g_val_loss_index] += g_error/normalization
+                d_decision = D(g_fake_data)
+                #print(d_decision)
+                d_val_accuracy[g_val_loss_index] += d_accuracy(d_decision, True)
+                d_decision = D(real)
+                #print(d_decision)
+                d_val_accuracy[g_val_loss_index] += d_accuracy(d_decision, False)
+
+            d_val_accuracy[g_val_loss_index] = d_val_accuracy[g_val_loss_index]/(2*val_num)
             g_val_loss[g_val_loss_index] = g_val_loss[g_val_loss_index]/val_num
             val_x_axis.append(epoch)
+            print("Validation Loss: ", g_val_loss[g_val_loss_index], "Discriminator Accuracy: ", d_val_accuracy[g_val_loss_index])
+
             if g_val_loss[g_val_loss_index] < min_val_loss:
-                torch.save(D, out_file + "_min_val_loss_D.pt")
-                torch.save(G, out_file + "_min_val_loss_G.pt")
+                torch.save(D, source_path+out_file + "_interm_D.pt")
+                torch.save(G, source_path+out_file + "_interm_G.pt")
+                torch.save(D.state_dict(), source_path+out_file + "_state_dict_interm_D.pt")
+                torch.save(G.state_dict(), source_path+out_file + "_state_dict_interm_G.pt")
                 min_val_loss = g_val_loss[g_val_loss_index]
-                g_val_loss_index += 1
+                print("Saved at epoch:", epoch)
+            g_val_loss_index += 1
 
         if epoch % print_interval == 0:
             print("(", time() - t_init, ") Epoch", epoch, ": D (error:", d_loss[d_loss_index - 1], ") G (error:", g_loss[g_loss_index - 1], "); ")
 
-    torch.save(D, out_file + "_D.pt")
-    torch.save(G, out_file + "_G.pt")
+    torch.save(D, source_path+out_file + "_D.pt")
+    torch.save(G, source_path+out_file + "_G.pt")
+    torch.save(D.state_dict(), source_path+out_file + "_state_dict_D.pt")
+    torch.save(G.state_dict(), source_path+out_file + "_state_dict_G.pt")
 
-    plt.plot(np.arange(0, g_loss_index), g_loss, label='Generator')
+
+    #Validation Discriminator Accuracy Plot
+    plt.plot(val_x_axis, d_val_accuracy, label='Discriminator')
     plt.legend()
-    plt.title('Normalized GAN Losses')
+    plt.title('GAN: Discriminator Validation Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.savefig(source_path+out_file + "_Val_Discriminator_Accuracy.png", )
+    plt.show()
+
+    #Validation Loss Plot
+    plt.plot(val_x_axis, g_val_loss, label='Generator')
+    plt.legend()
+    plt.title('GAN: Normalized Validation Losses')
     plt.xlabel('Epochs')
     plt.ylabel('Normalized Loss')
+    plt.savefig(source_path+out_file + "_Normalized_Validation_GAN_Loss.png", )
     plt.show()
 
+    #GAN Loss Plots
     plt.plot(np.arange(0, d_loss_index), d_loss, label='Discriminator')
     plt.legend()
-    plt.title('GAN Losses')
+    plt.title('GAN: Discriminator Losses')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
+    plt.savefig( source_path+out_file + "_GAN_Discriminator_Loss.png")
     plt.show()
     plt.plot(np.arange(0, g_loss_index), g_loss, label='Generator')
     plt.legend()
-    plt.title('GAN Losses')
+    plt.title('GAN: Generator Losses')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
+    plt.savefig(source_path+out_file + "_GAN_Generator_Loss.png")
     plt.show()
 
-    g_fake_data = G(train_loader.dataset.tensors[0][:4, :,:,:]).detach()
-    display_imgs((train_loader.dataset.tensors[1][:4, :,:,:], g_fake_data), ("real", "fake"))
+    test_loss = 0
+
+    for data in test_loader:
+      gray, real = data
+      g_fake_data = G(gray)
+      g_error = criterion2(g_fake_data, real)
+      normalization = loss_normalizer(gray, real)
+      test_loss += g_error/normalization
+    test_loss = test_loss/test_num
+    print('Normalized Test Loss:', test_loss)
+
+    G.eval()
+    g_fake_data = G(test_loader.dataset.tensors[0][:4, :,:,:]).detach()
+    print("Final GAN")
+    display_imgs((test_loader.dataset.tensors[1][:4, :,:,:].cpu(), test_loader.dataset.tensors[0][:4, :,:,:].cpu(), g_fake_data.cpu()), ("real", "input", "fake"), save=True, fileName=source_path+out_file+'_test_imgs_best_model.png')
+
+    G = torch.load(source_path+out_file + "_interm_G.pt")
+    G.eval()
+    print("Interm Best GAN")
+    g_fake_data = G(test_loader.dataset.tensors[0][:4, :,:,:]).detach()
+    display_imgs((test_loader.dataset.tensors[1][:4, :,:,:].cpu(), test_loader.dataset.tensors[0][:4, :,:,:].cpu(), g_fake_data.cpu()), ("real", "input", "fake"), save=True, fileName=source_path+out_file+'_test_imgs_best_model.png')
+
+# GAN File
+
 
 
 def train_baseline (model, train_loader, num_epochs=5, learning_rate=1e-3):
@@ -211,7 +267,6 @@ def run():
 
 
 
-
 if __name__ == '__main__':
     # PARSER
     parser = argparse.ArgumentParser()
@@ -234,7 +289,7 @@ if __name__ == '__main__':
     torch.manual_seed(42)
 
     # OTHER HYPERPARAMETERS
-    P = {'g_hidden_size1': 32, 'g_hidden_size2': 16, 'd_input_size':64, 'd_kernel_size':3, 'd_kernel_number':20, 'd_hidden_size':16,
+    P = {'g_hidden_size1': 32, 'g_hidden_size2': 64, 'g_hidden_size3': 128, 'd_input_size':64, 'd_kernel_size':3, 'd_kernel_number':20, 'd_hidden_size':16,
          'd_output_size':1, 'd_conv_layers':1, 'd_fclayers':2}
 
     if args.user=='mark':
@@ -245,17 +300,15 @@ if __name__ == '__main__':
         val_path = 'C:/Users/Alice/Documents/School/ECE324/Project/tiny-imagenet-200/tiny-imagenet-200/train/Fish/'
     else:
         img_path = args.img_path
+
     images = import_folder(img_path, args.num_imgs).float()
     grayimages = process(images)
-    DT = TensorDataset(grayimages, images)
-    train_loader = DataLoader(DT, batch_size=args.batch_size, shuffle=True)
-    train_size = len(images)
-    if args.mode != 'inference':
-        images = import_folder(val_path, args.val_num_imgs).float()
-        grayimages = process(images)
-        DT = TensorDataset(grayimages, images)
-        val_size = len(images)
-        val_loader = DataLoader(DT, batch_size=args.batch_size, shuffle=True)
+    Dtrain = TensorDataset(grayimages[:400], images[:400])
+    train_loader = DataLoader(Dtrain, batch_size=args.batch_size, shuffle=True)
+    Dval = TensorDataset(grayimages[400:490], images[400:490])
+    val_loader = DataLoader(Dval, batch_size=args.batch_size, shuffle=True)
+    Dtest = TensorDataset(grayimages[490:], images[490:])
+    test_loader = DataLoader(Dtest, batch_size=args.batch_size, shuffle=True)
 
     # CALL RUN IF INFERENCE MODE
     if args.mode == 'inference':
@@ -269,7 +322,7 @@ if __name__ == '__main__':
             PT = True if args.in_prefix==None else False
 
             if args.in_prefix == None:
-                G = Generator(hidden_size1=P['g_hidden_size1'], hidden_size2=P['g_hidden_size2'])
+                G = GenResNet(hidden_size1=P['g_hidden_size1'], hidden_size2=P['g_hidden_size2'], hidden_size3=P["g_hidden_size3"])
                 D = Discriminator(input_size=P['d_input_size'], kernelSize=P['d_kernel_size'], kernelNum=P['d_kernel_number'],
                                   hidden_size=P['d_hidden_size'], output_size=P['d_output_size'], convlayers=P['d_conv_layers'],
                                   fclayers=P['d_fclayers'])
@@ -285,7 +338,7 @@ if __name__ == '__main__':
                 G.cuda()
                 D.cuda()
 
-            train_GAN(G, D, train_loader, val_loader, train_size, val_size, pretraining=PT, out_file=args.out_prefix, num_epochs=args.epochs)
+            train_GAN(G, D, train_loader, val_loader, test_loader, 400, 90, 10, "/users/marka/Desktop/School/Engsci year 3/ECE324/project/", pretraining=PT, out_file=args.out_prefix, num_epochs=args.epochs)
         else:
             M = None
 

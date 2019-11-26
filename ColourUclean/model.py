@@ -5,6 +5,39 @@ from torch.utils.data import DataLoader
 import torch.nn.functional as F
 from time import time
 
+class GenResNet(nn.Module):
+    def __init__(self, hidden_size1, hidden_size2, hidden_size3):
+        super(GenResNet, self).__init__()
+
+        self.c1 = nn.Conv2d(3, hidden_size1, 3, stride=2, padding=1)
+        self.c2 = nn.Conv2d(hidden_size1, hidden_size2, 3, stride=2, padding=1)
+        self.c3 = nn.Conv2d(hidden_size2, hidden_size3, 3)
+        self.c4 = nn.Conv2d(hidden_size3, 64, 3)
+        self.ct4 = nn.ConvTranspose2d(64, hidden_size3, 3)
+        self.ct3 = nn.ConvTranspose2d (hidden_size3, hidden_size2, 3)
+        self.ct2 = nn.ConvTranspose2d (hidden_size2, hidden_size1, 3, stride=2, padding=1, output_padding=1)
+        self.ct1 = nn.ConvTranspose2d (hidden_size1, 2, 3, stride=2, padding=1, output_padding=1)
+
+        self.res3 = nn.Conv2d(hidden_size3, hidden_size3, 3, padding=1)
+        self.res2 = nn.Conv2d(hidden_size2, hidden_size2, 3, padding=1)
+        self.res1 = nn.Conv2d(hidden_size1, hidden_size1, 3, padding=1)
+
+    def forward(self, inputs):
+        next = F.leaky_relu(self.c1(inputs))
+        res1 = self.res1(next)
+        next = F.leaky_relu(self.c2(next))
+        res2 = self.res2(next)
+        next = F.leaky_relu(self.c3(next))
+        res3 = self.res3(next)
+        next = F.leaky_relu(self.c4(next))
+        next = F.leaky_relu(self.ct4(next) + res3)
+        next = F.leaky_relu(self.ct3(next) + res2)
+        next = F.leaky_relu(self.ct2(next) + res1)
+        next = self.ct1(next)
+
+        return torch.stack((inputs[:,0,:,:], next[:,0,:,:], next[:,1,:,:]), dim=1)
+
+
 class Autoencoder(nn.Module):
     def __init__(self):
         super(Autoencoder, self).__init__()
