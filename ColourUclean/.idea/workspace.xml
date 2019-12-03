@@ -159,8 +159,8 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.Main" />
       <item itemvalue="Python.CUc" />
+      <item itemvalue="Python.Main" />
     </list>
   </component>
   <component name="SvnConfiguration">
