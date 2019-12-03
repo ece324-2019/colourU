@@ -5,31 +5,44 @@ from torch.utils.data import DataLoader
 import torch.nn.functional as F
 from time import time
 
+
 class GenResNet(nn.Module):
-    def __init__(self, hidden_size1, hidden_size2, hidden_size3):
+    def __init__(self, hidden_size1, hidden_size2, hidden_size3, hidden_size4):
         super(GenResNet, self).__init__()
 
-        self.c1 = nn.Conv2d(3, hidden_size1, 3, stride=2, padding=1)
+        self.c1 = nn.Conv2d(4, hidden_size1, 3, stride=2, padding=1)
         self.c2 = nn.Conv2d(hidden_size1, hidden_size2, 3, stride=2, padding=1)
         self.c3 = nn.Conv2d(hidden_size2, hidden_size3, 3)
-        self.c4 = nn.Conv2d(hidden_size3, 64, 3)
-        self.ct4 = nn.ConvTranspose2d(64, hidden_size3, 3)
+        self.c4 = nn.Conv2d(hidden_size3, hidden_size4, 3)
+        self.c5 = nn.Conv2d(hidden_size4, 64,3)
+        self.ct5 = nn.ConvTranspose2d(64, hidden_size4, 3)
+        self.ct4 = nn.ConvTranspose2d(hidden_size4, hidden_size3, 3)
         self.ct3 = nn.ConvTranspose2d (hidden_size3, hidden_size2, 3)
         self.ct2 = nn.ConvTranspose2d (hidden_size2, hidden_size1, 3, stride=2, padding=1, output_padding=1)
         self.ct1 = nn.ConvTranspose2d (hidden_size1, 2, 3, stride=2, padding=1, output_padding=1)
 
+        self.res4 = nn.Conv2d(hidden_size4, hidden_size4, 3, padding=1)
         self.res3 = nn.Conv2d(hidden_size3, hidden_size3, 3, padding=1)
         self.res2 = nn.Conv2d(hidden_size2, hidden_size2, 3, padding=1)
         self.res1 = nn.Conv2d(hidden_size1, hidden_size1, 3, padding=1)
 
+        self.norm1 = nn.BatchNorm2d(hidden_size1)
+        self.norm2 = nn.BatchNorm2d(hidden_size2)
+        self.norm3 = nn.BatchNorm2d(hidden_size3)
+        self.norm4 = nn.BatchNorm2d(hidden_size4)
+        self.norm5 = nn.BatchNorm2d(64)
+
     def forward(self, inputs):
-        next = F.leaky_relu(self.c1(inputs))
+        next = F.leaky_relu(self.norm1(self.c1(inputs)))
         res1 = self.res1(next)
-        next = F.leaky_relu(self.c2(next))
+        next = F.leaky_relu(self.norm2(self.c2(next)))
         res2 = self.res2(next)
-        next = F.leaky_relu(self.c3(next))
+        next = F.leaky_relu(self.norm3(self.c3(next)))
         res3 = self.res3(next)
-        next = F.leaky_relu(self.c4(next))
+        next = F.leaky_relu(self.norm4(self.c4(next)))
+        res4 = self.res4(next)
+        next = F.leaky_relu(self.norm5(self.c5(next)))
+        next = F.leaky_relu(self.ct5(next) + res4)
         next = F.leaky_relu(self.ct4(next) + res3)
         next = F.leaky_relu(self.ct3(next) + res2)
         next = F.leaky_relu(self.ct2(next) + res1)
