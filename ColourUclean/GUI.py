@@ -8,6 +8,7 @@ import numpy as np
 import sys
 
 from matplotlib import pyplot as plt
+from scipy import ndimage
 from model import *
 
 import torch
@@ -56,6 +57,8 @@ class Window(Frame):
         # Actual buttons
         callGAN = Button(text="ColourU", width=10, height=1, command=self.callmodel)
         callGAN.pack(in_=b_frame, side=LEFT, padx=20)
+        callBL = Button(text="Baseline", width=10, height=1, command=self.callbaseline)
+        callBL.pack(in_=b_frame, side=LEFT, padx=20)
         choosecaller = Button(text="Choose Colour", width=18, height=1, command=self.choose_colour)
         choosecaller.pack(in_ = b_frame, side=LEFT)
         zoomout = Button(text="[-]", width=5, height = 1, command=self.zoom_out)
@@ -66,13 +69,14 @@ class Window(Frame):
         self.currentColour.pack(in_=b_frame, side=LEFT, padx=40)
 
         # Import Model
-        self.model = torch.load("salamander_fish_G.pt", map_location=torch.device('cpu'))
+        self.model = torch.load("sfhpG.pt", map_location=torch.device('cpu'))
+        self.model2 = torch.load("five_categories_baseline.pt", map_location=torch.device('cpu'))
 
     # ----------------------
     # Load Image
     # ----------------------
     def load_img(self):
-        path = filedialog.askopenfilename(initialdir = "/", title= "Select file", filetypes=(("jpeg files", "*.JPEG"), ("all files", "*.*")))
+        path = filedialog.askopenfilename(initialdir = "/Users/marka/Desktop/School/Engsci year 3/ECE324/project/writeup images/", title= "Select file")
 
         self.image_data = rgb2lab(plt.imread(path))
         self.image_data[:, :, 1:] = 0
@@ -86,9 +90,9 @@ class Window(Frame):
     # Save File
     # ----------------------
     def save_file(self):
-        path = filedialog.asksaveasfilename(initialdir = "/",title = "Select file",filetypes = (("jpeg files","*.JPEG"),("all files","*.*")))
+        path = filedialog.asksaveasfilename(initialdir = "/Users/marka/Desktop/School/Engsci year 3/ECE324/project/processed/",title = "Select file")
 
-        #self.transformed_image.save(path)
+        plt.imsave(path, self.image_data.astype('B'))
 
     # ----------------------
     # Choose Colour
@@ -165,10 +169,26 @@ class Window(Frame):
     # Call the NN
     # ----------------------
     def callmodel(self):
-        new_img = torch.tensor(self.LAB_image_data).permute(2,0,1).unsqueeze(0).float()
+        new_img = torch.zeros((1, 4, self.LAB_image_data.shape[0], self.LAB_image_data.shape[1]))
+        new_img[0, 0:3, :, :] = torch.tensor(self.LAB_image_data).permute(2,0,1).float()
+        new_img[0, 3, :, :] = new_img[0,0,:,:] - torch.tensor(ndimage.gaussian_filter(new_img[0,0,:,:], 3))
 
         coloured_image = self.model(new_img)
         coloured_image = coloured_image.detach().squeeze().permute(1,2,0).numpy()
+
+        plt.imshow(lab2rgb(coloured_image))
+        plt.show()
+
+        l = torch.nn.MSELoss()
+
+    def callbaseline(self):
+        new_img = torch.zeros((1, 4, self.LAB_image_data.shape[0], self.LAB_image_data.shape[1]))
+        new_img[0, 0:3, :, :] = torch.tensor(self.LAB_image_data).permute(2, 0, 1).float()
+        new_img[0, 3, :, :] = new_img[0, 0, :, :] - torch.tensor(ndimage.gaussian_filter(new_img[0, 0, :, :], 3))
+
+        coloured_image = self.model2(new_img)
+        coloured_image = coloured_image.detach().squeeze().permute(1, 2, 0).numpy()
+
         plt.imshow(lab2rgb(coloured_image))
         plt.show()
 
