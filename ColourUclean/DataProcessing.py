@@ -15,7 +15,6 @@ def import_folder(path, num_imgs=-1, start = 0, expected_size=(64, 64, 3)):
 
     img_array_stack = []
     for i in range(start, start + num_imgs):
-        img = plt.imread(path + img_files[i])
         if img.shape == expected_size:
             img_array_stack += [plt.imread(path + img_files[i])]
 
