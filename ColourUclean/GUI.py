@@ -21,6 +21,7 @@ class Window(Frame):
         self.loaded_image = None
         self.image_data = None
         self.LAB_image_data = None
+        self.original_image_data = None
 
         self.image_label = Label(self)
         self.image_label.bind("<Button-1>", self.draw_px)
@@ -79,6 +80,7 @@ class Window(Frame):
         path = filedialog.askopenfilename(initialdir = "/Users/marka/Desktop/School/Engsci year 3/ECE324/project/writeup images/", title= "Select file")
 
         self.image_data = rgb2lab(plt.imread(path))
+        self.original_image_data = np.copy(self.image_data)
         self.image_data[:, :, 1:] = 0
         self.LAB_image_data = np.copy(self.image_data)
         self.image_data = (255*lab2rgb(self.image_data)).astype(int)
@@ -112,6 +114,8 @@ class Window(Frame):
     # Place sample
     # ----------------------
     def draw_px(self, event):
+        px_size = 2
+
         if self.selected_colour == None:
             return
 
@@ -119,7 +123,7 @@ class Window(Frame):
 
         image_x = min(self.loaded_image.width - 1, event.x//self.transformations["scale"])
         image_y = min(self.loaded_image.height - 1, event.y//self.transformations["scale"])
-        box = tuple(map(int, (max(image_x - 2, 0), min(image_x + 3, self.loaded_image.width), max(image_y - 2, 0), min(image_y + 3, self.loaded_image.height))))
+        box = tuple(map(int, (max(image_x - px_size, 0), min(image_x + px_size + 1, self.loaded_image.width), max(image_y - px_size, 0), min(image_y + px_size + 1, self.loaded_image.height))))
 
         lab_colour = tuple(rgb2lab(np.asarray([[self.selected_colour]]).astype('B'))[0,0,:])
 
@@ -176,10 +180,13 @@ class Window(Frame):
         coloured_image = self.model(new_img)
         coloured_image = coloured_image.detach().squeeze().permute(1,2,0).numpy()
 
+        l1 = np.sum(np.power(coloured_image - self.original_image_data, 2))
+        l2 = np.sum(np.power(self.LAB_image_data - self.original_image_data, 2))
+        norm_loss = l1/l2
+        print(norm_loss)
+
         plt.imshow(lab2rgb(coloured_image))
         plt.show()
-
-        l = torch.nn.MSELoss()
 
     def callbaseline(self):
         new_img = torch.zeros((1, 4, self.LAB_image_data.shape[0], self.LAB_image_data.shape[1]))
@@ -188,6 +195,11 @@ class Window(Frame):
 
         coloured_image = self.model2(new_img)
         coloured_image = coloured_image.detach().squeeze().permute(1, 2, 0).numpy()
+
+        l1 = np.sum(np.power(coloured_image - self.original_image_data, 2))
+        l2 = np.sum(np.power(self.LAB_image_data - self.original_image_data, 2))
+        norm_loss = l1 / l2
+        print(norm_loss)
 
         plt.imshow(lab2rgb(coloured_image))
         plt.show()
